@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const [form, setForm] = useState(() => {
   const saved = localStorage.getItem('inspection');
@@ -11,6 +11,14 @@ const [form, setForm] = useState(() => {
         mirrors: false
       };
 });
+const [saved, setSaved] = useState<{ [key: string]: boolean } | null>(null);
+
+useEffect(() => {
+  const stored = localStorage.getItem('inspection');
+  if (stored) {
+    setSaved(JSON.parse(stored));
+  }
+}, []);
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,11 +33,6 @@ const handleSubmit = (e: React.FormEvent) => {
 };
 
 
-  // Save to local storage
-  localStorage.setItem('inspectionData', JSON.stringify(form));
-
-  alert("Inspection submitted and saved!");
-};
 
   return (
     <div style={{ maxWidth: 600, margin: "2rem auto", fontFamily: "sans-serif" }}>
@@ -47,6 +50,19 @@ const handleSubmit = (e: React.FormEvent) => {
         <button type="submit" style={{ marginTop: 20, padding: "10px 20px" }}>
           ✅ Submit Inspection
         </button>
+        {saved && (
+  <div style={{ marginTop: '30px' }}>
+    <h3>🗂️ Last Saved Inspection:</h3>
+    <ul>
+      {Object.entries(saved).map(([key, value]) => (
+        <li key={key}>
+          {key.charAt(0).toUpperCase() + key.slice(1)}: {value ? '✅ Done' : '❌ Not Done'}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
       </form>
     </div>
   );
