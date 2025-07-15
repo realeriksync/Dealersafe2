@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 
 const [form, setForm] = useState(() => {
   const saved = localStorage.getItem('inspection');
+  const handleReset = () => {
+  localStorage.removeItem('inspection');
+  setSaved(null);
+  alert('Saved inspection cleared!');
+};
   return saved
     ? JSON.parse(saved)
     : {
@@ -11,7 +16,7 @@ const [form, setForm] = useState(() => {
         mirrors: false
       };
 });
-const [saved, setSaved] = useState<{ [key: string]: boolean } | null>(null);
+const [saved, setSaved] = useState<{ form: { [key: string]: boolean }, timestamp: string } | null>(null);
 
 useEffect(() => {
   const stored = localStorage.getItem('inspection');
@@ -28,10 +33,16 @@ useEffect(() => {
 
 const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
-  localStorage.setItem('inspection', JSON.stringify(form));
+
+  const submission = {
+    form,
+    timestamp: new Date().toLocaleString(),
+  };
+
+  localStorage.setItem('inspection', JSON.stringify(submission));
+  setSaved(submission);
   alert('Inspection submitted and saved!');
 };
-
 
 
   return (
@@ -49,12 +60,19 @@ const handleSubmit = (e: React.FormEvent) => {
 
         <button type="submit" style={{ marginTop: 20, padding: "10px 20px" }}>
           ✅ Submit Inspection
+        <button
+  type="button"
+  onClick={handleReset}
+  style={{ marginTop: 10, padding: "8px 20px", backgroundColor: "#eee", border: "1px solid #ccc" }}
+>
+  ❌ Clear Last Inspection  
         </button>
-        {saved && (
+{saved && saved.form && (
   <div style={{ marginTop: '30px' }}>
-    <h3>🗂️ Last Saved Inspection:</h3>
+    <h3>🗂️ Last Saved Inspection</h3>
+    <p><strong>Submitted on:</strong> {saved.timestamp}</p>
     <ul>
-      {Object.entries(saved).map(([key, value]) => (
+      {Object.entries(saved.form).map(([key, value]) => (
         <li key={key}>
           {key.charAt(0).toUpperCase() + key.slice(1)}: {value ? '✅ Done' : '❌ Not Done'}
         </li>
