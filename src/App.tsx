@@ -16,12 +16,24 @@ const [form, setForm] = useState(() => {
         mirrors: false
       };
 });
-const [saved, setSaved] = useState<{ form: { [key: string]: boolean }, timestamp: string } | null>(null);
+type InspectionData = {
+  form: { [key: string]: boolean };
+  timestamp: string;
+};
+
+const [saved, setSaved] = useState<InspectionData | null>(null);
 
 useEffect(() => {
   const stored = localStorage.getItem('inspection');
   if (stored) {
-    setSaved(JSON.parse(stored));
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.form && typeof parsed.timestamp === 'string') {
+        setSaved(parsed);
+      }
+    } catch (err) {
+      console.error("Failed to parse inspection data:", err);
+    }
   }
 }, []);
 
