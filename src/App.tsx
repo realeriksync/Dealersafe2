@@ -1,12 +1,17 @@
 import { useState } from 'react';
 
-export default function App() {
-  const [form, setForm] = useState({
-    brakes: false,
-    tires: false,
-    lights: false,
-    mirrors: false,
-  });
+const [form, setForm] = useState(() => {
+  const saved = localStorage.getItem('inspection');
+  return saved
+    ? JSON.parse(saved)
+    : {
+        brakes: false,
+        tires: false,
+        lights: false,
+        mirrors: false
+      };
+});
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -15,7 +20,10 @@ export default function App() {
 
 const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
-  console.log("Submitted inspection:", form);
+  localStorage.setItem('inspection', JSON.stringify(form));
+  alert('Inspection submitted and saved!');
+};
+
 
   // Save to local storage
   localStorage.setItem('inspectionData', JSON.stringify(form));
