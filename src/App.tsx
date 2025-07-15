@@ -1,101 +1,85 @@
 import { useState, useEffect } from 'react';
 
-const [form, setForm] = useState(() => {
-  const saved = localStorage.getItem('inspection');
-  const handleReset = () => {
-  localStorage.removeItem('inspection');
-  setSaved(null);
-  alert('Saved inspection cleared!');
-};
-  return saved
-    ? JSON.parse(saved)
-    : {
-        brakes: false,
-        tires: false,
-        lights: false,
-        mirrors: false
-      };
-});
-type InspectionData = {
-  form: { [key: string]: boolean };
-  timestamp: string;
+type Status = 'pass' | 'fail' | null;
+
+const defaultForm: Record<string, Status> = {
+  brakes: null,
+  tires: null,
+  lights: null,
+  mirrors: null,
 };
 
-const [saved, setSaved] = useState<InspectionData | null>(null);
+export default function App() {
+  const [form, setForm] = useState<Record<string, Status>>(() => {
+    const saved = localStorage.getItem('inspection');
+    return saved ? JSON.parse(saved) : defaultForm;
+  });
 
-useEffect(() => {
-  const stored = localStorage.getItem('inspection');
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed.form && typeof parsed.timestamp === 'string') {
-        setSaved(parsed);
-      }
-    } catch (err) {
-      console.error("Failed to parse inspection data:", err);
-    }
-  }
-}, []);
-
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setForm(prev => ({ ...prev, [name]: checked }));
+  const handleStatus = (key: string, status: Status) => {
+    setForm(prev => ({ ...prev, [key]: status }));
   };
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-
-  const submission = {
-    form,
-    timestamp: new Date().toLocaleString(),
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('inspection', JSON.stringify(form));
+    alert('Inspection submitted and saved!');
   };
-
-  localStorage.setItem('inspection', JSON.stringify(submission));
-  setSaved(submission);
-  alert('Inspection submitted and saved!');
-};
-
 
   return (
-    <div style={{ maxWidth: 600, margin: "2rem auto", fontFamily: "sans-serif" }}>
+    <div style={{ maxWidth: 600, margin: '2rem auto', fontFamily: 'sans-serif' }}>
       <h1>🚛 Dealer Safety Shield</h1>
       <p>Complete your daily inspection checklist:</p>
 
       <form onSubmit={handleSubmit}>
         {Object.entries(form).map(([key, value]) => (
-          <label key={key} style={{ display: "block", margin: "10px 0" }}>
-            <input type="checkbox" name={key} checked={value} onChange={handleChange} />
-            {" "}Check {key.charAt(0).toUpperCase() + key.slice(1)}
-          </label>
+          <div key={key} style={{ margin: '10px 0' }}>
+            <label style={{ display: 'block', marginBottom: 5 }}>
+              {`Check ${key.charAt(0).toUpperCase() + key.slice(1)}`}
+            </label>
+            <button
+              type="button"
+              style={{
+                marginRight: 10,
+                background: value === 'pass' ? '#4CAF50' : '#eee',
+                color: value === 'pass' ? 'white' : 'black',
+                padding: '6px 12px',
+                borderRadius: 4,
+                border: '1px solid #ccc',
+              }}
+              onClick={() => handleStatus(key, 'pass')}
+            >
+              ✅ Pass
+            </button>
+            <button
+              type="button"
+              style={{
+                background: value === 'fail' ? '#F44336' : '#eee',
+                color: value === 'fail' ? 'white' : 'black',
+                padding: '6px 12px',
+                borderRadius: 4,
+                border: '1px solid #ccc',
+              }}
+              onClick={() => handleStatus(key, 'fail')}
+            >
+              ❌ Fail
+            </button>
+          </div>
         ))}
 
-        <button type="submit" style={{ marginTop: 20, padding: "10px 20px" }}>
-          ✅ Submit Inspection
         <button
-  type="button"
-  onClick={handleReset}
-  style={{ marginTop: 10, padding: "8px 20px", backgroundColor: "#eee", border: "1px solid #ccc" }}
->
-  ❌ Clear Last Inspection  
+          type="submit"
+          style={{
+            marginTop: 20,
+            padding: '10px 20px',
+            background: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: 4,
+            cursor: 'pointer',
+          }}
+        >
+          📋 Submit Inspection
         </button>
-{saved && saved.form && (
-  <div style={{ marginTop: '30px' }}>
-    <h3>🗂️ Last Saved Inspection</h3>
-    <p><strong>Submitted on:</strong> {saved.timestamp}</p>
-    <ul>
-      {Object.entries(saved.form).map(([key, value]) => (
-        <li key={key}>
-          {key.charAt(0).toUpperCase() + key.slice(1)}: {value ? '✅ Done' : '❌ Not Done'}
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
-<button type="submit" style={{ marginTop: 20, padding: "10px 20px" }}>
-  ✅ Submit Inspection
-</button> 
       </form>
     </div>
   );
