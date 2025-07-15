@@ -13,11 +13,15 @@ export default function App() {
     setForm(prev => ({ ...prev, [name]: checked }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitted inspection:", form);
-    alert("Inspection submitted successfully!");
-  };
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  console.log("Submitted inspection:", form);
+
+  // Save to local storage
+  localStorage.setItem('inspectionData', JSON.stringify(form));
+
+  alert("Inspection submitted and saved!");
+};
 
   return (
     <div style={{ maxWidth: 600, margin: "2rem auto", fontFamily: "sans-serif" }}>
