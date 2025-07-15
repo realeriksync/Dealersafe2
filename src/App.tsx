@@ -63,6 +63,9 @@ const handleSubmit = (e: React.FormEvent) => {
   </div>
 )}
 
+<button type="submit" style={{ marginTop: 20, padding: "10px 20px" }}>
+  ✅ Submit Inspection
+</button> 
       </form>
     </div>
   );
